@@ -1,2 +1,15 @@
-package org.example.afarm.entity;public class SingleFileDto {
+package org.example.afarm.entity;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import org.springframework.web.multipart.MultipartFile;
+
+@Data
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
+public class SingleFileDto {
+    private MultipartFile file;
 }

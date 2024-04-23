@@ -1,9 +1,10 @@
-package org.example.afarm.DTO;
+package org.example.afarm.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.apache.catalina.User;
 
+import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.List;
 
 @Getter
@@ -11,18 +12,19 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
+@Builder
 @Entity
 @Table(name = "journal")
-public class JournalDto {
+public class JournalEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY )
     @Column(name = "journal_id")
     private int id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "user_user_id")
-    private UserDto user_id;
+    private UserEntity user;
 
     @Column(name = "title")
     private String title;
@@ -30,9 +32,16 @@ public class JournalDto {
     @Column(name = "content",columnDefinition = "TEXT")
     private String content;
 
-    @OneToMany(mappedBy = "journal" ,cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JoinColumn(name = "journal_id_file",referencedColumnName = "journal_id")
-    private List<fileEntity> file;
+    @Column(name = "Date")
+    private LocalDateTime date;
 
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JoinColumn(name = "journal_id_file",referencedColumnName = "journal_id")
+    private List<FileEntity> file;
+
+    public void update(String title, String content){
+        this.title = title;
+        this.content = content;
+    }
 }
 

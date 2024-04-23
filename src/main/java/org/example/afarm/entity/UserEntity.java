@@ -1,4 +1,4 @@
-package org.example.afarm.DTO;
+package org.example.afarm.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
@@ -14,16 +14,20 @@ import java.util.List;
 @ToString
 @Entity
 @Table(name = "user")
-public class UserDto {
+public class UserEntity {
     @Id
     @Column(name = "user_id")
     private String username;
     @Column(name = "user_pwd")
     private String pessword;
-    @Column(name = "plant_name")
-    private String plant_name;
 
-    @OneToMany
-    @JoinColumn(name = "user_user_id",referencedColumnName = "user_id")
-    private List<JournalDto> journal;
+    @Column(name = "photo")
+    private String photoPath;
+
+    @OneToOne
+    @JoinColumn(name = "plant_name",referencedColumnName = "plant_name")
+    private PlantManageEntity plant_name;
+
+    @OneToMany(mappedBy = "user")
+    private List<JournalEntity> journal;
 }

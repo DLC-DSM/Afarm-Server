@@ -1,5 +1,6 @@
-package org.example.afarm.DTO;
+package org.example.afarm.filter;
 
+import org.example.afarm.entity.UserEntity;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
@@ -8,10 +9,10 @@ import java.util.Collection;
 
 public class CustomUserDetails implements UserDetails {
 
-    private final UserDto userDto;
+    private final UserEntity userEntity;
 
-    public CustomUserDetails(UserDto userDto) {
-        this.userDto = userDto;
+    public CustomUserDetails(UserEntity userEntity) {
+        this.userEntity = userEntity;
     }
 
 
@@ -22,7 +23,7 @@ public class CustomUserDetails implements UserDetails {
         collection.add(new GrantedAuthority() {
             @Override
             public String getAuthority() {
-                return userDto.getRole();
+                return null;
             }
         });
         return collection;
@@ -30,14 +31,13 @@ public class CustomUserDetails implements UserDetails {
 
     @Override
     public String getPassword() {
-        return userDto.getPessword();
+        return userEntity.getPessword();
     }
 
     @Override
     public String getUsername() {
-        return userDto.getUsername();
+        return userEntity.getUsername();
     }
-
     @Override
     public boolean isAccountNonExpired() {
         return true;

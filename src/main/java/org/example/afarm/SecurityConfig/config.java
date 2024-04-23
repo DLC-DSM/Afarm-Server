@@ -1,18 +1,38 @@
-package org.example.afarm.SecurityConfing;
+package org.example.afarm.SecurityConfig;
 
 
-import lombok.RequiredArgsConstructor;
+import org.example.afarm.filter.LoginFilter;
+import org.example.afarm.jwt.JWTFilter;
+import org.example.afarm.jwt.JWTUtil;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
 @EnableWebSecurity
 public class config{
+
+    private final AuthenticationConfiguration authenticationConfiguration;
+
+    private final JWTUtil jwtUtil;
+    public config(AuthenticationConfiguration authenticationConfiguration, JWTUtil jwtUtil) {
+        this.authenticationConfiguration = authenticationConfiguration;
+        this.jwtUtil = jwtUtil;
+    }
+
+    @Bean
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
+        return authenticationConfiguration.getAuthenticationManager();
+    }
+
+
 
     @Bean
     public BCryptPasswordEncoder bCryptPasswordEncoder(){
@@ -26,7 +46,7 @@ public class config{
                 .csrf((auth) -> auth.disable());
 
         http
-                .formLogin((auth)->auth.disable());
+                .formLogin((auth) -> auth.disable());
 
         http
                 .httpBasic((auth) -> auth.disable());
@@ -34,10 +54,21 @@ public class config{
 
         http
                 .authorizeHttpRequests((auth) -> auth
-                        .requestMatchers("/","/login","/user/login","/register"
-                        ,"/user/register","/test").permitAll()
-                        .requestMatchers("/my/**").hasAnyRole("USER")
-                        .anyRequest().authenticated()
+                        .requestMatchers("/","/login","/register","/user/register").permitAll()
+                        .requestMatchers("/my/**").permitAll()//.hasAnyRole("USER")
+                        .anyRequest().permitAll() // 이것 반드시 바꾸기.
+                );
+
+        http
+                .addFilterAt(new JWTFilter(jwtUtil), LoginFilter.class);
+
+        http
+                .addFilterAt(new LoginFilter(authenticationManager(authenticationConfiguration),jwtUtil), UsernamePasswordAuthenticationFilter.class);
+
+        http
+                .logout((auth)-> auth
+                        .logoutUrl("/logout")
+                        .logoutSuccessUrl("/")
                 );
 
         http
