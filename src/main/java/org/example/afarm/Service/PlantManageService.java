@@ -1,12 +1,14 @@
 package org.example.afarm.Service;
 
 import org.example.afarm.DTO.AiResponseDTO;
+import org.example.afarm.DTO.AiRevggDto;
 import org.example.afarm.DTO.PlantInfoDto;
 import org.example.afarm.DTO.PlantManageDto;
 import org.example.afarm.Repository.PlantManageRepository;
 import org.example.afarm.Repository.PlantRepository;
 import org.example.afarm.Repository.UserRepository;
 import org.example.afarm.entity.*;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,6 +17,7 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Calendar;
@@ -38,70 +41,104 @@ public class PlantManageService {
     public void nowPlantInfo(PlantInfoDto plantInfoDto, String username){
         UserEntity user = userRepository.findByUsername(username);
         PlantManageEntity entity = plantManageRepository.findByUser(user);
-        entity.setPlantTemp(plantInfoDto.getTemp());
-        entity.setPollOutside(plantInfoDto.getDate());
-        entity.setSoilPoll(plantInfoDto.getHumi());
+
+        int setuation = 2;
+
+        float temp = Float.parseFloat(plantInfoDto.getTemp());
+        float PollOut = Float.parseFloat(plantInfoDto.getDate());
+        float SoilPoll = Float.parseFloat(plantInfoDto.getHumi());
+
+        if(SoilPoll< 30.0){
+            setuation = 3;
+        }
+
+
+        entity.setPlantTemp(String.valueOf(temp));
+        entity.setPollOutside(String.valueOf(PollOut));
+        entity.setSoilPoll(String.valueOf(SoilPoll));
+        entity.setSituation(setuation);
 
         plantManageRepository.save(entity);
     }
 
-    //성장도.
+    //질병예측
     @Transactional
-    public void aiPlantRate(MultipartFile file,String username){
+    public void aiPlantRate(MultipartFile file,String username) throws IOException {
         UserEntity user = userRepository.findByUsername(username);
         PlantManageEntity p = plantManageRepository.findByUser(user);
 
+        ByteArrayResource body = new ByteArrayResource(file.getBytes()) {
+            @Override
+            public String getFilename() {
+                return file.getOriginalFilename();
+            }
+        };
 
-//        MultiValueMap<String,Object> param = new LinkedMultiValueMap<>();
-//        param.add("image",file);
-//
-//        HttpHeaders httpHeaders = new HttpHeaders();
-//        httpHeaders.setContentType(MediaType.MULTIPART_FORM_DATA);
-//        httpHeaders.setContentType(MediaType.IMAGE_JPEG);
-//
-//        HttpEntity<?> http = new HttpEntity<>(param,httpHeaders);
-//
-//        RestTemplate restTemplate = new RestTemplate();
-//
-//        // 질병 예측 ai 요청. rate가 70%이상이면 질병 발생
-//        ResponseEntity<AiResponseDTO> response = restTemplate.exchange("http://192.168.10.76/predict", HttpMethod.POST,http, AiResponseDTO.class);
-        // 성장도 계산.
-       // ResponseEntity<AiResponseDTO> response2 = restTemplate.exchange("http://192.168.10.76/predict_"+p.getPlantName(), HttpMethod.POST,http, AiResponseDTO.class);
+        MultiValueMap<String,Object> param = new LinkedMultiValueMap<>();
+        param.add("file",body);
+
+        HttpHeaders httpHeaders = new HttpHeaders();
+        httpHeaders.setContentType(MediaType.MULTIPART_FORM_DATA);
+        //httpHeaders.setContentType(MediaType.IMAGE_JPEG);
+
+        HttpEntity<?> http = new HttpEntity<>(param,httpHeaders);
+
+        RestTemplate restTemplate = new RestTemplate();
+
+        // 질병 예측 ai 요청. rate가 70%이상이면 질병 발생
+
+        int situation = 2;
+
+        //상추
+        if(p.getPlantName().getPlantName().equals("상추")) {
+            ResponseEntity<AiRevggDto> response = restTemplate.exchange("http://192.168.10.76:8080/predict_vgg", HttpMethod.POST, http, AiRevggDto.class);
+            situation = response.getBody().getPredicted_class();
+            System.out.println(response.getHeaders());
+            System.out.println(response.getBody());
+        }
+        // 토마토
 
 
-        // 시작일과, 현재일의 일수 차이를 구한 후, 성장일과,
-        // 나누어 /생각해보기-> 단계를 이용해 성장률을 구한다.
-        // 1. 시작일 가져오기.
+        if(p.getPlantName().getPlantName().equals("토마토")){
+            ResponseEntity<AiResponseDTO> response2 = restTemplate.exchange("http://192.168.10.76:8080/predict", HttpMethod.POST, http, AiResponseDTO.class);
+            String[][] desease = response2.getBody().getObjects();
+
+
+            for(String[] leaf:desease){
+                if(Integer.parseInt(leaf[5])%2==0){
+                    situation = 0;
+                }
+            }
+
+            System.out.println(response2.getHeaders());
+            System.out.println(response2.getBody());
+
+        }
+
+
+
+
+
+
         Date startDate = p.getStartDay();
         Date today = Date.from(now());
 
         // 2. 계산
-        long diff = startDate.getTime() - today.getTime();
+        long diff = today.getTime() - startDate.getTime();
 
         long re = diff / (24*60*60*1000);
 
         // 성장 일 수 가져오기.
         int grow = p.getPlantName().getPlantGrowTime();
 
-        float percent = (float) re /grow;
+        float percent = (float) (re /grow);
 
         System.out.println(percent);
-//        String[][] desease = response.getBody().getObjects();
-//        int situation = 0;
-//
-//        for(String[] leaf:desease){
-//            if(Float.parseFloat(leaf[4])>0.7){
-//                situation = 4;
-//            }
-//        }
 
 
 
-        SingleFileDto singleFileDto = SingleFileDto.builder()
-                .file(file)
-                .build();
-        p.setGrowthRate(10);
-        //p.setSituation(situation);
+        p.setGrowthRate((int)percent);
+        p.setSituation(situation);
         plantManageRepository.save(p);
     }
 
@@ -127,16 +164,18 @@ public class PlantManageService {
         System.out.println(percent);
     }
 
+    @Transactional
     public PlantInfoDto getPlantinfo(String username){
         UserEntity user = userRepository.findByUsername(username);
         PlantManageEntity entity = plantManageRepository.findByUser(user);
 
         PlantInfoDto plantInfoDto = PlantInfoDto.builder()
+                .username(entity.getUser().getUsername())
                 .Temp(entity.getPlantTemp())
                 .Date(entity.getSoilPoll())
                 .Humi(entity.getPlantTemp())
                 .Situation(entity.getSituation()) // 작물의 상태 메세지를 위한 상황 전달.
-                .rate(entity.getGrowthRate())
+                .rate(String.valueOf(entity.getGrowthRate()))
                 .build();
 
         return plantInfoDto;

@@ -1,18 +1,15 @@
 package org.example.afarm.Service;
 
-import org.example.afarm.DTO.FileDto;
 import org.example.afarm.DTO.JournalDto;
+import org.example.afarm.DTO.JournalGetDto;
 import org.example.afarm.Repository.FileRepository;
 import org.example.afarm.Repository.UserRepository;
 import org.example.afarm.entity.FileEntity;
 import org.example.afarm.entity.JournalEntity;
 import org.example.afarm.Repository.JournalRepository;
 import org.example.afarm.entity.UserEntity;
-import org.springframework.beans.propertyeditors.FileEditor;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -39,7 +36,7 @@ public class JournalService {
 
 
     @Transactional
-    public int saveJournal(JournalDto journalDto, FileDto file, String username) {
+    public int saveJournal(JournalGetDto journalDto, String username) {
         UserEntity entity = userRepository.findByUsername(username);
 
         JournalEntity journal = JournalEntity.builder()
@@ -51,8 +48,8 @@ public class JournalService {
 
         journalRepository.save(journal);
 
-        if(file.getFiles() != null && !file.getFiles().isEmpty()){
-            for(MultipartFile file1 : file.getFiles()){
+        if(journalDto.getFiles() != null && !journalDto.getFiles().isEmpty()){
+            for(MultipartFile file1 : journalDto.getFiles()){
                 UUID uuid = UUID.randomUUID();
                 String imageFileName = uuid+"_"+file1.getOriginalFilename();
 
@@ -71,7 +68,7 @@ public class JournalService {
                 FileEntity image = FileEntity.builder()
                         //.save_path("/path/"+imageFileName)
                         .save_path(path+imageFileName)
-                        .journal(journal)
+                        //.journal(journal)
                         .build();
 
                 fileRepository.save(image);
@@ -79,7 +76,7 @@ public class JournalService {
             }
         }
 
-        return journalDto.getId();
+        return 5;
     }
 
     @Transactional
@@ -87,17 +84,18 @@ public class JournalService {
         UserEntity user = userRepository.findByUsername(username);
         JournalEntity journal = journalRepository.findByUserAndId(user,id);
 
+        System.out.println(journal.toString());
         if(journal==null){
             throw new NullPointerException("NOT_EXIST_BOARD");
         }
 
-        journalRepository.delete(journal);
+        journalRepository.deleteByIdAndUser(id,user.getUsername());
     }
 
     @Transactional
-    public Page<JournalDto> selectAllJournal(Pageable pageable, String username){
+    public Page<JournalEntity> selectAllJournal(Pageable pageable, String username){
         UserEntity user = userRepository.findByUsername(username);
-        Page<JournalDto> journals = journalRepository.findAllByUser(user, pageable);
+        Page<JournalEntity> journals = journalRepository.findAllByUser(user, pageable);
         if(journals == null){
             throw new NullPointerException();
         }

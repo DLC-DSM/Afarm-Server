@@ -1,8 +1,10 @@
 package org.example.afarm.Controllers;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.websocket.server.PathParam;
 import org.example.afarm.DTO.FileDto;
 import org.example.afarm.DTO.JournalDto;
+import org.example.afarm.DTO.JournalGetDto;
 import org.example.afarm.DTO.UserDto;
 import org.example.afarm.Repository.JournalRepository;
 import org.example.afarm.Service.JournalService;
@@ -32,15 +34,17 @@ public class JournalController {
     }
 
     @PostMapping("/write")
-    public ResponseEntity<?> insertJournal(JournalDto journalDto, FileDto file, Authentication authentication){
+    public ResponseEntity<?> insertJournal(@RequestBody JournalGetDto journalDto, Authentication authentication, HttpServletRequest request){
         UserDetails userDetails =  (UserDetails) authentication.getPrincipal();
-        System.out.println(journalDto);
-        journalService.saveJournal(journalDto,file,userDetails.getUsername());
+        System.out.println(request.getHeader("content-type"));
+        System.out.println(request.getAttribute("title"));
+        System.out.println(journalDto.getContent());
+        journalService.saveJournal(journalDto,userDetails.getUsername());
         return generateResEntity("J_Save",201);
     }
 
-    @GetMapping("/delete/{num}")
-    public ResponseEntity<?> deleteJournal(@RequestParam Integer num, Authentication authentication){
+    @DeleteMapping("/delete")
+    public ResponseEntity<?> deleteJournal(Integer num, Authentication authentication){
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
         journalService.deleteJournal(num,userDetails.getUsername());
         return generateResEntity("J_Del",200);
@@ -55,11 +59,22 @@ public class JournalController {
     }
 
     @ResponseBody
-    @GetMapping("/select/{num}")
-    public ResponseEntity<?> selectSingleJournal(@RequestParam Integer num, Authentication authentication){
+    @GetMapping("/page")
+    public ResponseEntity<?> selectSingleJournal(Integer num, Authentication authentication){
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
         JournalDto journal = journalService.selectOne(userDetails.getUsername(), num);
         return new ResponseEntity<>(journal,HttpStatusCode.valueOf(200));
     }
+
+
+    @ResponseBody
+    @PostMapping("/update")
+    public ResponseEntity<?> updateJournal(JournalDto journalDto, Authentication authentication){
+        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+        journalService.updateOne(userDetails.getUsername(), journalDto.getId(),journalDto);
+        return new ResponseEntity<>("update_ok",HttpStatusCode.valueOf(200));
+    }
+
+
 
 }

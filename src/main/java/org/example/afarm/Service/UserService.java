@@ -1,5 +1,6 @@
 package org.example.afarm.Service;
 
+import org.apache.catalina.User;
 import org.example.afarm.DTO.UserDto;
 import org.example.afarm.Repository.UserRepository;
 import org.example.afarm.entity.UserEntity;
@@ -38,6 +39,14 @@ public class UserService {
 
 
         userRepository.save(user);
+    }
+
+    @Transactional
+    public void DeleteUser(String username){
+        UserEntity user = userRepository.findByUsername(username);
+        if(user.getUsername() != null){
+            userRepository.delete(user);
+        }
     }
 
 }

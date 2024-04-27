@@ -1,8 +1,10 @@
 package org.example.afarm.filter;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.example.afarm.DTO.UserDto;
 import org.example.afarm.jwt.JWTUtil;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -10,26 +12,35 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
-public class LoginFilter extends UsernamePasswordAuthenticationFilter {
+import java.io.IOException;
 
+public class LoginFilter extends UsernamePasswordAuthenticationFilter {
     private final AuthenticationManager authenticationManager;
     private final JWTUtil jwtUtil;
+    private final ObjectMapper objectMapper;
 
-    public LoginFilter(AuthenticationManager authenticationManager, JWTUtil jwtUtil) {
+    public LoginFilter(AuthenticationManager authenticationManager, JWTUtil jwtUtil, ObjectMapper objectMapper) {
         this.authenticationManager = authenticationManager;
         this.jwtUtil = jwtUtil;
+        this.objectMapper = objectMapper;
     }
 
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException{
-        String username = obtainUsername(request);
-        String password = obtainPassword(request);
-        System.out.println(username);
-        System.out.println(password);
+        try {
+            UserDto userDto = objectMapper.readValue(request.getInputStream(), UserDto.class);
+            String username = userDto.getUsername();
+            String password = userDto.getPwd();
+            System.out.println(username);
+            System.out.println(password);
 
-        UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(username,password,null);
+            UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(username,password,null);
 
-        return authenticationManager.authenticate(authenticationToken);
+            return authenticationManager.authenticate(authenticationToken);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
     }
 
     @Override
@@ -38,9 +49,10 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 
         String username = customUserDetails.getUsername();
 
-        String token = jwtUtil.createJwt(username,60*60*60*10L);
+        String token = jwtUtil.createJwt(username,6000*600*10L);
 
         response.addHeader("Authorization","Bearer "+token);
+        // body 설정
 
     }
 

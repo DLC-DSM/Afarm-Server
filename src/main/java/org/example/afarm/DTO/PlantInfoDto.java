@@ -14,6 +14,6 @@ public class PlantInfoDto {
     private String Date;
     private String Temp;
     private String Humi;
-    private int rate;
+    private String rate;
     private int Situation;
 }

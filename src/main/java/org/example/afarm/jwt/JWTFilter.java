@@ -26,7 +26,7 @@ public class JWTFilter extends OncePerRequestFilter {
         String auth = request.getHeader("Authorization");
 
         //헤더 검증.
-        if(auth == null || !auth.startsWith("Bearer ")){
+        if(auth == null || !auth.startsWith("Bearer ") && request.getRequestURL().equals("")){
             System.out.println("token not exist");
             filterChain.doFilter(request,response); // request, response를 다음 filter의 매개변수를 지정.
             return; //메소드 종료.

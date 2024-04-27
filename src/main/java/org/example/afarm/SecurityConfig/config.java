@@ -1,6 +1,7 @@
 package org.example.afarm.SecurityConfig;
 
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.example.afarm.filter.LoginFilter;
 import org.example.afarm.jwt.JWTFilter;
 import org.example.afarm.jwt.JWTUtil;
@@ -22,9 +23,12 @@ public class config{
     private final AuthenticationConfiguration authenticationConfiguration;
 
     private final JWTUtil jwtUtil;
-    public config(AuthenticationConfiguration authenticationConfiguration, JWTUtil jwtUtil) {
+
+    private final ObjectMapper objectMapper;
+    public config(AuthenticationConfiguration authenticationConfiguration, JWTUtil jwtUtil, ObjectMapper objectMapper) {
         this.authenticationConfiguration = authenticationConfiguration;
         this.jwtUtil = jwtUtil;
+        this.objectMapper = objectMapper;
     }
 
     @Bean
@@ -63,7 +67,7 @@ public class config{
                 .addFilterAt(new JWTFilter(jwtUtil), LoginFilter.class);
 
         http
-                .addFilterAt(new LoginFilter(authenticationManager(authenticationConfiguration),jwtUtil), UsernamePasswordAuthenticationFilter.class);
+                .addFilterAt(new LoginFilter(authenticationManager(authenticationConfiguration),jwtUtil,objectMapper), UsernamePasswordAuthenticationFilter.class);
 
         http
                 .logout((auth)-> auth

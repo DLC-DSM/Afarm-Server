@@ -12,16 +12,18 @@ public class ExceptionH {
 
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<?> RunException(RuntimeException e){
-        return new ResponseEntity<>(e.getMessage(), HttpStatusCode.valueOf(400));
+        System.out.println(e);
+        return new ResponseEntity<>(e, HttpStatusCode.valueOf(403));
     }
 
     @ExceptionHandler(NullPointerException.class)
     public ResponseEntity<?> NullHendler(NullPointerException ne){
-        return new ResponseEntity<>(ne.getMessage(),HttpStatusCode.valueOf(400));
+        return new ResponseEntity<>(ne.getMessage(),HttpStatusCode.valueOf(406));
     }
 
     @ExceptionHandler(IOException.class)
     public ResponseEntity<?> IoHendler(IOException ne){
+        System.out.println(ne);
         return new ResponseEntity<>(ne.getMessage(),HttpStatusCode.valueOf(409));
     }
 }

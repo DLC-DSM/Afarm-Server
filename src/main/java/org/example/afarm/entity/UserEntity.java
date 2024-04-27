@@ -25,9 +25,7 @@ public class UserEntity {
     private String photoPath;
 
     @OneToOne
-    @JoinColumn(name = "plant_name",referencedColumnName = "plant_name")
-    private PlantManageEntity plant_name;
+    @JoinColumn(name = "plant_name",referencedColumnName = "plant_name_pl")
+    private PlantEntity plant_name;
 
-    @OneToMany(mappedBy = "user")
-    private List<JournalEntity> journal;
 }

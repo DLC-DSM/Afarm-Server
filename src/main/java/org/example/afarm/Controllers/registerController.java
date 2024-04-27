@@ -6,12 +6,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 @Controller
 @ResponseBody
-@RequestMapping("/user")
 public class registerController {
 
     private final RegisterService registerService;
@@ -22,9 +22,10 @@ public class registerController {
 
 
     @PostMapping("/register")
-    public ResponseEntity<?> registerController(UserEntity userEntity){
+    public ResponseEntity<?> registerController(@RequestBody UserEntity userEntity){
         System.out.println(userEntity.getUsername());
+        System.out.println(userEntity.getPessword());
         registerService.registerProcess(userEntity);
-        return new ResponseEntity<>("ok", HttpStatus.valueOf(200));
+        return new ResponseEntity<String>("ok", HttpStatus.valueOf(200));
     }
 }

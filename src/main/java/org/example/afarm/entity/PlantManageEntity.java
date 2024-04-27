@@ -31,19 +31,19 @@ public class PlantManageEntity {
     private PlantEntity plantName;
 
     @Column(name = "plant_temp")
-    private String plantTemp;
+    private String plantTemp = "0";
 
     @Column(name = "soil_pollination")
-    private String soilPoll;
+    private String soilPoll = "0";
 
     @Column(name = "pollination")
-    private String pollOutside;
+    private String pollOutside = "0";
 
     @Column(name = "plant_growth_rate")
-    private Integer growthRate;
+    private Integer growthRate = 0;
 
     @Column
-    private Integer Situation;
+    private Integer Situation = 0;
 
     @Column(name = "start_date")
     private Date startDay;

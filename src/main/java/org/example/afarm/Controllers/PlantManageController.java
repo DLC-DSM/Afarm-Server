@@ -1,5 +1,7 @@
 package org.example.afarm.Controllers;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jdk.jfr.ContentType;
 import org.example.afarm.DTO.PlantInfoDto;
 import org.example.afarm.DTO.PlantManageDto;
 import org.example.afarm.Service.PlantManageService;
@@ -11,11 +13,10 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
 
 @Controller
 @RequestMapping("/PlantM")
@@ -28,14 +29,16 @@ public class PlantManageController {
 
     @PostMapping("/connect")
     public ResponseEntity<?> nowInfoSet(@RequestBody PlantInfoDto plantInfoDto){
-        plantManageService.nowPlantInfo(plantInfoDto, plantInfoDto.getUsername());
+        plantManageService.nowPlantInfo(plantInfoDto, "admin");
         System.out.println(plantInfoDto);
         return new ResponseEntity<>("PM_SET_OK", HttpStatusCode.valueOf(200));
     }
 
-    @GetMapping("/ai")
-    public ResponseEntity<?> getAiService(MultipartFile file,Authentication authentication,String username){
-        plantManageService.aiPlantRate(file,username);
+    @ResponseBody
+    @PostMapping("/ai")
+    public ResponseEntity<?> getAiService(MultipartFile file,Authentication authentication) throws IOException {
+        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+        plantManageService.aiPlantRate(file, userDetails.getUsername());
         return new ResponseEntity<>(HttpStatusCode.valueOf(200));
     }
 
@@ -44,10 +47,24 @@ public class PlantManageController {
         plantManageService.test(username);
     }
 
+    @ResponseBody
     @PostMapping("/create")
     public ResponseEntity<?> createPlant(@RequestBody PlantManageDto plant){
         //UserDetails userDetails = (UserDetails) authentication.getPrincipal();
         plantManageService.CreatePlantinfo(plant, plant.getUsername());
         return new ResponseEntity<>(HttpStatusCode.valueOf(200));
     }
+
+    @ResponseBody
+    @GetMapping("/GetInfo")
+    public ResponseEntity<?> getPlantManage(Authentication authentication, HttpServletRequest request){
+        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+        System.out.println(request);
+        PlantInfoDto p = plantManageService.getPlantinfo(userDetails.getUsername());
+        return new ResponseEntity<PlantInfoDto>(p,HttpStatusCode.valueOf(200));
+    }
+
+//    @ResponseBody
+//    @DeleteMapping("/delete")
+
 }
