@@ -2,6 +2,7 @@ package org.example.afarm.Controllers;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.websocket.server.PathParam;
+import jdk.jfr.ContentType;
 import org.example.afarm.DTO.FileDto;
 import org.example.afarm.DTO.JournalDto;
 import org.example.afarm.DTO.JournalGetDto;
@@ -11,12 +12,18 @@ import org.example.afarm.Service.JournalService;
 import org.example.afarm.entity.JournalEntity;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatusCode;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
+import java.util.List;
 
 @Controller
 @RequestMapping("/journal")
@@ -34,7 +41,7 @@ public class JournalController {
     }
 
     @PostMapping("/write")
-    public ResponseEntity<?> insertJournal(@RequestBody JournalGetDto journalDto, Authentication authentication, HttpServletRequest request){
+    public ResponseEntity<?> insertJournal(JournalGetDto journalDto, Authentication authentication, HttpServletRequest request){
         UserDetails userDetails =  (UserDetails) authentication.getPrincipal();
         System.out.println(request.getHeader("content-type"));
         System.out.println(request.getAttribute("title"));
@@ -64,6 +71,24 @@ public class JournalController {
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
         JournalDto journal = journalService.selectOne(userDetails.getUsername(), num);
         return new ResponseEntity<>(journal,HttpStatusCode.valueOf(200));
+    }
+
+    @GetMapping(value = "/image")
+    public ResponseEntity<?> getImage(Integer num,Integer filenum, Authentication authentication) throws IOException {
+        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+        JournalDto journal = journalService.selectOne(userDetails.getUsername(), num);
+        if(journal.getImageUrls().isEmpty()){
+            return new ResponseEntity<>("no Exist File",HttpStatusCode.valueOf(200));
+        }
+
+        List<byte[]> images =  journalService.getFile(journal);
+
+
+        return ResponseEntity
+                .ok()
+                .contentType(MediaType.IMAGE_JPEG)
+                .body(images.get(filenum-1));
+
     }
 
 

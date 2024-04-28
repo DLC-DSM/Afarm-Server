@@ -12,12 +12,15 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.FileCopyUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 import static java.time.LocalTime.now;
@@ -68,7 +71,7 @@ public class JournalService {
                 FileEntity image = FileEntity.builder()
                         //.save_path("/path/"+imageFileName)
                         .save_path(path+imageFileName)
-                        //.journal(journal)
+                        .journal(journal)
                         .build();
 
                 fileRepository.save(image);
@@ -112,6 +115,17 @@ public class JournalService {
                 .journal(journal)
                 .build();
         return pageJournal;
+    }
+
+    public List<byte[]> getFile(JournalDto journal) throws IOException {
+        List<byte[]> bytefile = new ArrayList<>();
+        for (String url:journal.getImageUrls()){
+            System.out.println(url);
+            File file = new File(url);
+            bytefile.add(FileCopyUtils.copyToByteArray(file));
+        }
+
+        return bytefile;
     }
 
     @Transactional

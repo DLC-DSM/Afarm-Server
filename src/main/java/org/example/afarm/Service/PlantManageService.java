@@ -152,7 +152,7 @@ public class PlantManageService {
         Date today = Date.from(now());
 
         // 2. 계산
-        long diff = startDate.getTime() - today.getTime();
+        long diff =today.getTime() - startDate.getTime();
 
         long re = diff / (24*60*60*1000);
 
