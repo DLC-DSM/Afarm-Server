@@ -131,7 +131,7 @@ public class PlantManageService {
         // 성장 일 수 가져오기.
         int grow = p.getPlantName().getPlantGrowTime();
 
-        float percent = (float) (re /grow);
+        float percent = (float) (re /grow) * 100;
 
         System.out.println(percent);
 

@@ -71,7 +71,7 @@ public class JournalService {
                 FileEntity image = FileEntity.builder()
                         //.save_path("/path/"+imageFileName)
                         .save_path(path+imageFileName)
-                        .journal(journal)
+                        .journal(journal.getId())
                         .build();
 
                 fileRepository.save(image);
