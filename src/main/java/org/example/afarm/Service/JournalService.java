@@ -99,6 +99,7 @@ public class JournalService {
     public Page<JournalEntity> selectAllJournal(Pageable pageable, String username){
         UserEntity user = userRepository.findByUsername(username);
         Page<JournalEntity> journals = journalRepository.findAllByUser(user, pageable);
+        System.out.println("is in");
         if(journals == null){
             throw new NullPointerException();
         }

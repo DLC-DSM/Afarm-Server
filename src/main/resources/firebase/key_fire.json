@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "810286415082",
+    "project_id": "afarm-cb45e",
+    "storage_bucket": "afarm-cb45e.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:810286415082:android:0862ec00498e0b4e3c2b93",
+        "android_client_info": {
+          "package_name": "com.example.ai_expo"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDRcGvCtHcS3DPcxdg7hxIEDX-ggr1Dj4c"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

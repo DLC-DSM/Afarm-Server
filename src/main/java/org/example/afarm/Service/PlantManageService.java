@@ -30,27 +30,33 @@ public class PlantManageService {
     private final PlantManageRepository plantManageRepository;
     private final UserRepository userRepository;
     private final PlantRepository plantRepository;
+    private final FirebaseCloudMessageService firebaseCloudMessageService;
 
-    public PlantManageService(PlantManageRepository plantManageRepository, UserRepository userRepository, PlantRepository plantRepository) {
+    public PlantManageService(PlantManageRepository plantManageRepository, UserRepository userRepository, PlantRepository plantRepository, FirebaseCloudMessageService firebaseCloudMessageService) {
         this.plantManageRepository = plantManageRepository;
         this.userRepository = userRepository;
         this.plantRepository = plantRepository;
+        this.firebaseCloudMessageService = firebaseCloudMessageService;
     }
 
     @Transactional
-    public void nowPlantInfo(PlantInfoDto plantInfoDto, String username){
+    public void nowPlantInfo(PlantInfoDto plantInfoDto, String username,String target) throws IOException {
         UserEntity user = userRepository.findByUsername(username);
         PlantManageEntity entity = plantManageRepository.findByUser(user);
 
         int setuation = 2;
 
         float temp = Float.parseFloat(plantInfoDto.getTemp());
-        float PollOut = Float.parseFloat(plantInfoDto.getDate());
-        float SoilPoll = Float.parseFloat(plantInfoDto.getHumi());
+        float PollOut = Float.parseFloat(plantInfoDto.getHumi());
+        float SoilPoll = Float.parseFloat(plantInfoDto.getDate());
 
-        if(SoilPoll< 30.0){
+        if(SoilPoll< 10.0){
             setuation = 3;
+            //firebaseCloudMessageService.sendMessageTo(target,"수분부족","수분이 부족합니다. 물을 주세요.");
         }
+
+
+
 
 
         entity.setPlantTemp(String.valueOf(temp));
@@ -61,12 +67,32 @@ public class PlantManageService {
         plantManageRepository.save(entity);
     }
 
+    @Transactional
+    public void rate(String username) throws IOException{
+        UserEntity user = userRepository.findByUsername(username);
+        PlantManageEntity p = plantManageRepository.findByUser(user);
+
+        int situation = 2;
+        int chainge = 1;
+
+        if(chainge==1){
+            p.setGrowthRate(14);
+            System.out.println(p.getGrowthRate());
+            chainge = 2;
+        }else{
+            p.setGrowthRate(32);
+        }
+
+        p.setSituation(situation);
+        plantManageRepository.save(p);
+    }
     //질병예측
     @Transactional
     public void aiPlantRate(MultipartFile file,String username) throws IOException {
         UserEntity user = userRepository.findByUsername(username);
         PlantManageEntity p = plantManageRepository.findByUser(user);
 
+        System.out.println("letsgo");
         ByteArrayResource body = new ByteArrayResource(file.getBytes()) {
             @Override
             public String getFilename() {
@@ -85,13 +111,13 @@ public class PlantManageService {
 
         RestTemplate restTemplate = new RestTemplate();
 
-        // 질병 예측 ai 요청. rate가 70%이상이면 질병 발생
+         //질병 예측 ai 요청. rate가 70%이상이면 질병 발생
 
         int situation = 2;
 
         //상추
         if(p.getPlantName().getPlantName().equals("상추")) {
-            ResponseEntity<AiRevggDto> response = restTemplate.exchange("http://192.168.10.76:8080/predict_vgg", HttpMethod.POST, http, AiRevggDto.class);
+            ResponseEntity<AiRevggDto> response = restTemplate.exchange("http://192.168.137.142:8080/predict_vgg", HttpMethod.POST, http, AiRevggDto.class);
             situation = response.getBody().getPredicted_class();
             System.out.println(response.getHeaders());
             System.out.println(response.getBody());
@@ -100,7 +126,7 @@ public class PlantManageService {
 
 
         if(p.getPlantName().getPlantName().equals("토마토")){
-            ResponseEntity<AiResponseDTO> response2 = restTemplate.exchange("http://192.168.10.76:8080/predict", HttpMethod.POST, http, AiResponseDTO.class);
+            ResponseEntity<AiResponseDTO> response2 = restTemplate.exchange("http://192.168.137.142:8080/predict", HttpMethod.POST, http, AiResponseDTO.class);
             String[][] desease = response2.getBody().getObjects();
 
 
@@ -137,7 +163,6 @@ public class PlantManageService {
 
 
 
-        p.setGrowthRate((int)percent);
         p.setSituation(situation);
         plantManageRepository.save(p);
     }
@@ -173,7 +198,7 @@ public class PlantManageService {
                 .username(entity.getUser().getUsername())
                 .Temp(entity.getPlantTemp())
                 .Date(entity.getSoilPoll())
-                .Humi(entity.getPlantTemp())
+                .Humi(entity.getPollOutside())
                 .Situation(entity.getSituation()) // 작물의 상태 메세지를 위한 상황 전달.
                 .rate(String.valueOf(entity.getGrowthRate()))
                 .build();

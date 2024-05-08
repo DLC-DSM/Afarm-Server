@@ -3,6 +3,7 @@ package org.example.afarm.Controllers;
 import jakarta.servlet.http.HttpServletRequest;
 import jdk.jfr.ContentType;
 import org.example.afarm.DTO.PlantInfoDto;
+import org.example.afarm.DTO.PlantInfoDto2;
 import org.example.afarm.DTO.PlantManageDto;
 import org.example.afarm.Service.PlantManageService;
 import org.example.afarm.entity.PlantEntity;
@@ -28,10 +29,24 @@ public class PlantManageController {
     }
 
     @PostMapping("/connect")
-    public ResponseEntity<?> nowInfoSet(@RequestBody PlantInfoDto plantInfoDto){
-        plantManageService.nowPlantInfo(plantInfoDto, "admin");
+    public ResponseEntity<?> nowInfoSet(@RequestBody PlantInfoDto plantInfoDto) throws IOException {
+        String tar = "fMylLbYeRNq8u4tGAyfq5F:APA91bHRHPY50OxIO5Fn9teRIJnzK8R23q2YBwn_OUsFpaiXAn0pH3ZbGybaRItIlX95Gp5QbhcspZqW9t7MolRWUCEuznPA7wi-oDbmWz96blRt9_v_dNXs9nr0k_6M9SU58YSxnEvj";
         System.out.println(plantInfoDto);
+        plantManageService.nowPlantInfo(plantInfoDto,"admin",tar);
+
         return new ResponseEntity<>("PM_SET_OK", HttpStatusCode.valueOf(200));
+    }
+
+    @PostMapping("/connect2")
+    public ResponseEntity<?> nowInfo(@RequestBody PlantInfoDto plantInfoDto){
+        System.out.println(plantInfoDto+"2");
+        return new ResponseEntity<>("PM_SET_OK", HttpStatusCode.valueOf(200));
+    }
+
+    @PostMapping("/rate")
+    public ResponseEntity<?> rateSet(Authentication authentication) throws IOException {
+        plantManageService.rate(authentication.getName());
+        return new ResponseEntity<>("rateOk",HttpStatusCode.valueOf(200));
     }
 
     @ResponseBody
