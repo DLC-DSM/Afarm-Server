@@ -22,7 +22,7 @@ public class PlantManageEntity {
     @Column(name = "plant_id")
     private Integer id;
 
-    @OneToOne
+    @OneToOne // 추후 ManyToOne으로 교체.
     @JoinColumn(name = "user_id", referencedColumnName = "user_id")
     private UserEntity user;
 

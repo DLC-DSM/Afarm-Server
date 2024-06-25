@@ -30,13 +30,11 @@ public class PlantManageService {
     private final PlantManageRepository plantManageRepository;
     private final UserRepository userRepository;
     private final PlantRepository plantRepository;
-    private final FirebaseCloudMessageService firebaseCloudMessageService;
 
-    public PlantManageService(PlantManageRepository plantManageRepository, UserRepository userRepository, PlantRepository plantRepository, FirebaseCloudMessageService firebaseCloudMessageService) {
+    public PlantManageService(PlantManageRepository plantManageRepository, UserRepository userRepository, PlantRepository plantRepository) {
         this.plantManageRepository = plantManageRepository;
         this.userRepository = userRepository;
         this.plantRepository = plantRepository;
-        this.firebaseCloudMessageService = firebaseCloudMessageService;
     }
 
     @Transactional
@@ -68,7 +66,7 @@ public class PlantManageService {
     }
 
     @Transactional
-    public void rate(String username) throws IOException{
+    public void testRate(String username) throws IOException{
         UserEntity user = userRepository.findByUsername(username);
         PlantManageEntity p = plantManageRepository.findByUser(user);
 
@@ -92,7 +90,6 @@ public class PlantManageService {
         UserEntity user = userRepository.findByUsername(username);
         PlantManageEntity p = plantManageRepository.findByUser(user);
 
-        System.out.println("letsgo");
         ByteArrayResource body = new ByteArrayResource(file.getBytes()) {
             @Override
             public String getFilename() {
@@ -207,16 +204,24 @@ public class PlantManageService {
 
     }
 
+    @Transactional
     public void CreatePlantinfo(PlantManageDto plantManage, String username){
 
         UserEntity user = userRepository.findByUsername(username);
         PlantEntity plant = plantRepository.findByPlantName(plantManage.getPlantName());
+        user.setPlant_name(plant);
         PlantManageEntity plantManageEntity = PlantManageEntity.builder()
                 .plantName(plant)
                 .user(user)
                 .startDay(Date.from(now()))
+                .plantTemp("0")
+                .soilPoll("0")
+                .pollOutside("0")
+                .growthRate(0)
+                .Situation(2)
                 .build();
         plantManageRepository.save(plantManageEntity);
+        userRepository.save(user);
 
     }
 }

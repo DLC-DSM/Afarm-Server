@@ -58,8 +58,8 @@ public class config{
 
         http
                 .authorizeHttpRequests((auth) -> auth
-                        .requestMatchers("/","/login","/register","/user/register").permitAll()
-                        .requestMatchers("/my/**").permitAll()//.hasAnyRole("USER")
+                        .requestMatchers("/","/login","/register","/user/register","/PlantM/connect","/plantCho").permitAll()
+                        .requestMatchers("/my/**").hasAnyRole("USER")
                         .anyRequest().permitAll() // 이것 반드시 바꾸기.
                 );
 

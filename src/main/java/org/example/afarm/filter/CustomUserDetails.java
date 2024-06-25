@@ -31,7 +31,7 @@ public class CustomUserDetails implements UserDetails {
 
     @Override
     public String getPassword() {
-        return userEntity.getPessword();
+        return userEntity.getPassword();
     }
 
     @Override

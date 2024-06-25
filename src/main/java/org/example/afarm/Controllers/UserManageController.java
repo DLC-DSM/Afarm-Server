@@ -2,6 +2,7 @@ package org.example.afarm.Controllers;
 
 import org.example.afarm.DTO.UserDto;
 import org.example.afarm.Service.UserService;
+import org.example.afarm.entity.UserEntity;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -36,5 +37,15 @@ public class UserManageController {
         return new ResponseEntity<>("Del_OK",HttpStatusCode.valueOf(200));
     }
 
+    @GetMapping("/userInfo")
+    public ResponseEntity<?> userInfomation(Authentication authentication){
+        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+        UserEntity user = userService.getUser(userDetails.getUsername());
+        UserDto userInfo = UserDto.builder()
+                .username(user.getUsername())
+                .plant_name(user.getPlant_name().getPlantName())
+                .build();
+        return new ResponseEntity<>(userInfo,HttpStatusCode.valueOf(200));
+    }
 
 }

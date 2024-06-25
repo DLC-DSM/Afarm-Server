@@ -5,6 +5,8 @@ import org.example.afarm.Repository.UserRepository;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import javax.management.openmbean.KeyAlreadyExistsException;
+
 @Service
 public class RegisterService {
 
@@ -19,17 +21,17 @@ public class RegisterService {
     public void registerProcess(UserEntity userEntity){
 
         String username = userEntity.getUsername();
-        String password = userEntity.getPessword();
+        String password = userEntity.getPassword();
 
         Boolean isExist = userRepository.existsByUsername(username);;
 
         if(isExist){
-            return;
+            throw new KeyAlreadyExistsException();
         }
         UserEntity data = new UserEntity();
 
         data.setUsername(username);
-        data.setPessword(bCryptPasswordEncoder.encode(password));
+        data.setPassword(bCryptPasswordEncoder.encode(password));
 
         userRepository.save(data);
     }

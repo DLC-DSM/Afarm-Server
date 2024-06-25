@@ -10,6 +10,6 @@ import lombok.Setter;
 @Builder
 public class UserDto {
     private String username;
-    private String pwd;
+    private String password;
     private String plant_name;
 }

@@ -19,7 +19,7 @@ public class UserEntity {
     @Column(name = "user_id")
     private String username;
     @Column(name = "user_pwd")
-    private String pessword;
+    private String password;
 
     @Column(name = "photo")
     private String photoPath;

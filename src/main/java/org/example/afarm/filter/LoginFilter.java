@@ -30,7 +30,7 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         try {
             UserDto userDto = objectMapper.readValue(request.getInputStream(), UserDto.class);
             String username = userDto.getUsername();
-            String password = userDto.getPwd();
+            String password = userDto.getPassword();
             System.out.println(username);
             System.out.println(password);
 
@@ -49,7 +49,7 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 
         String username = customUserDetails.getUsername();
 
-        String token = jwtUtil.createJwt(username,6000*600*10L);
+        String token = jwtUtil.createJwt(username,24*60*60*10L);
 
         response.addHeader("Authorization","Bearer "+token);
         // body 설정
