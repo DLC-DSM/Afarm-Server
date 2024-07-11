@@ -49,7 +49,6 @@ public class JournalService {
                 .user(entity)
                 .build();
 
-        journalRepository.save(journal);
 
         if(journalDto.getFiles() != null && !journalDto.getFiles().isEmpty()){
             for(MultipartFile file1 : journalDto.getFiles()){
@@ -79,7 +78,7 @@ public class JournalService {
             }
         }
 
-        return 5;
+        return journalRepository.save(journal).getId();
     }
 
     @Transactional
