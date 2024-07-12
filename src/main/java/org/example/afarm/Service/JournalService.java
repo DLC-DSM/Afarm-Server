@@ -82,7 +82,7 @@ public class JournalService {
     }
 
     @Transactional
-    public void deleteJournal(Integer id, String username){
+    public int deleteJournal(Integer id, String username){
         UserEntity user = userRepository.findByUsername(username);
         JournalEntity journal = journalRepository.findByUserAndId(user,id);
 
@@ -92,6 +92,8 @@ public class JournalService {
         }
 
         journalRepository.deleteByIdAndUser(id,user.getUsername());
+
+        return id;
     }
 
     @Transactional
