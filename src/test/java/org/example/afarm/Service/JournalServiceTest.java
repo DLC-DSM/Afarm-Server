@@ -84,7 +84,7 @@ class JournalServiceTest {
         ReflectionTestUtils.setField(journal,"id",5);// 더미데이터.
 
         Mockito.when(journalRepository.save(Mockito.any(JournalEntity.class))).thenReturn(journal);
-        int result = journalService.saveJournal(journalGetDto,"admin").getId(); // 만약 id가 반환되면 test가 자동으로 id가 더미의 아이디와 같도록 자동으로 설정
+        int result = journalService.saveJournal(journalGetDto,"admin"); // 만약 id가 반환되면 test가 자동으로 id가 더미의 아이디와 같도록 자동으로 설정
 
         assertThat(result).isEqualTo(5);
     }
