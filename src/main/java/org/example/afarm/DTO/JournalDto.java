@@ -31,8 +31,10 @@ public class JournalDto {
         this.Title = journal.getTitle();
         this.Content = journal.getContent();
         this.time = journal.getDate();
-        this.imageUrls = journal.getFile().stream()
-                .map(FileEntity::getSave_path)
-                .collect(Collectors.toList());
+        if(journal.getFile() != null) {
+            this.imageUrls = journal.getFile().stream()
+                    .map(FileEntity::getSave_path)
+                    .collect(Collectors.toList());
+        }
     }
 }

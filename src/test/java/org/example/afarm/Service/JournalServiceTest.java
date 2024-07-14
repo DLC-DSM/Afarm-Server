@@ -1,10 +1,12 @@
 package org.example.afarm.Service;
 
 import org.apache.catalina.User;
+import org.example.afarm.DTO.JournalDto;
 import org.example.afarm.DTO.JournalGetDto;
 import org.example.afarm.Repository.FileRepository;
 import org.example.afarm.Repository.JournalRepository;
 import org.example.afarm.Repository.UserRepository;
+import org.example.afarm.entity.FileEntity;
 import org.example.afarm.entity.JournalEntity;
 import org.example.afarm.entity.UserEntity;
 import org.junit.jupiter.api.BeforeEach;
@@ -20,6 +22,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
@@ -66,8 +69,14 @@ class JournalServiceTest {
                 .date(LocalDateTime.now(ZoneId.of("Asia/Seoul")))
                 .build();
 
+        FileEntity file = FileEntity.builder()
+                .journal(1)
+                .save_path("C:/Users/user/IdeaProjects/afarm/src/main/resources/photo/b7fb6405-ed28-470d-8964-a80f9ce214db_저자.jpg")
+                .build();
+
         samples.add(user);
         samples.add(journal);
+        samples.add(file);
 
         return samples;
     }
@@ -139,14 +148,73 @@ class JournalServiceTest {
 
     @Test
     void selectOne() {
+        List<Object> samples = makeSample();
+
+        UserEntity user = (UserEntity) samples.get(0);
+        JournalEntity journal = (JournalEntity) samples.get(1);
+        ReflectionTestUtils.setField(journal,"id",1);
+
+        Mockito.when(userRepository.findByUsername("admin")).thenReturn(user);
+        Mockito.when(journalRepository.findByUserAndId(user,1)).thenReturn(journal);
+
+        int result = journalService.selectOne("admin",1).getId();
+
+        assertThat(result).isEqualTo(1);
 
     }
 
     @Test
-    void getFile() {
+    void getFile() throws IOException {
+        List<Object> samples = makeSample();
+
+        UserEntity user = (UserEntity) samples.get(0);
+        JournalEntity journal = (JournalEntity) samples.get(1);
+        FileEntity file = (FileEntity) samples.get(2);
+        FileEntity file1 = (FileEntity) samples.get(2);
+        FileEntity file2 = (FileEntity) samples.get(2);
+
+        ReflectionTestUtils.setField(file,"id",1);
+        ReflectionTestUtils.setField(file1,"id",2);
+        ReflectionTestUtils.setField(file2,"id",3);
+
+        List<FileEntity> fileEntities =  Arrays.asList(file,file1,file2);
+
+        journal.setFile(fileEntities);
+
+        JournalDto journalDto = JournalDto.builder()
+                .journal(journal)
+                .build();
+
+        List<byte[]> fileRes = journalService.getFile(journalDto);
+
+        assertThat(fileRes.size()).isEqualTo(3);
     }
 
     @Test
     void updateOne() {
+        List<Object> samples = makeSample();
+
+        UserEntity user = (UserEntity) samples.get(0);
+
+        JournalEntity journal = (JournalEntity) samples.get(1);
+        JournalEntity uJournal =  JournalEntity.builder()
+                .title("this is test")
+                .content("just test")
+                .user(user)
+                .file(null)
+                .date(journal.getDate())
+                .build();
+        JournalDto j = JournalDto.builder()
+                .journal(uJournal)
+                .build();
+
+        ReflectionTestUtils.setField(journal,"id",108);
+
+        Mockito.when(journalRepository.findByUserAndId(user, 108)).thenReturn(journal);
+        Mockito.when(userRepository.findByUsername("admin")).thenReturn(user); // 해당 명령이 실행되면 다음 객체를 반환함.
+        Mockito.when(journalRepository.save(uJournal)).thenReturn(uJournal);
+
+        String content = journalService.updateOne("admin",108,j).getContent();
+        assertThat(content).isEqualTo("just test");
     }
 }

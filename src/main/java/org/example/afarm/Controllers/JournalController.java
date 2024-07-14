@@ -78,7 +78,7 @@ public class JournalController {
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
         JournalDto journal = journalService.selectOne(userDetails.getUsername(), num);
         if(journal.getImageUrls().isEmpty()){
-            return new ResponseEntity<>("no Exist File",HttpStatusCode.valueOf(200));
+            return new ResponseEntity<>("no Exist File",HttpStatusCode.valueOf(400));
         }
 
         List<byte[]> images =  journalService.getFile(journal);

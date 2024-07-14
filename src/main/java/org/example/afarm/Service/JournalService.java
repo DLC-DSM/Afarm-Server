@@ -78,7 +78,7 @@ public class JournalService {
             }
         }
 
-        return journalRepository.save(journal);
+        return journalRepository.save(journal).getId();
     }
 
     @Transactional
