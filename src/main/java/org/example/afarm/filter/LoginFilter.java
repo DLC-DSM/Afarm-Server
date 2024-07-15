@@ -2,6 +2,7 @@ package org.example.afarm.filter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.FilterChain;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.example.afarm.DTO.UserDto;
@@ -49,9 +50,12 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 
         String username = customUserDetails.getUsername();
 
-        String token = jwtUtil.createJwt(username,24*60*60*10L);
+        String token = jwtUtil.createJwt(username,24*60*60*1000L);
 
         response.addHeader("Authorization","Bearer "+token);
+
+        Cookie cookie = new Cookie("token","Bearer "+token);
+        response.addCookie(cookie);
         // body 설정
 
     }

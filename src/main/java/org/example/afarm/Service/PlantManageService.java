@@ -20,6 +20,8 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.temporal.ChronoUnit;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -38,7 +40,7 @@ public class PlantManageService {
     }
 
     @Transactional
-    public void nowPlantInfo(PlantInfoDto plantInfoDto, String username,String target) throws IOException {
+    public void nowPlantInfo(PlantInfoDto plantInfoDto, String username) throws IOException {
         UserEntity user = userRepository.findByUsername(username);
         PlantManageEntity entity = plantManageRepository.findByUser(user);
 
@@ -114,7 +116,7 @@ public class PlantManageService {
 
         //상추
         if(p.getPlantName().getPlantName().equals("상추")) {
-            ResponseEntity<AiRevggDto> response = restTemplate.exchange("http://192.168.137.142:8080/predict_vgg", HttpMethod.POST, http, AiRevggDto.class);
+            ResponseEntity<AiRevggDto> response = restTemplate.exchange("http://192.168.210.76:8001/predict_vgg", HttpMethod.POST, http, AiRevggDto.class);
             situation = response.getBody().getPredicted_class();
             System.out.println(response.getHeaders());
             System.out.println(response.getBody());
@@ -123,7 +125,7 @@ public class PlantManageService {
 
 
         if(p.getPlantName().getPlantName().equals("토마토")){
-            ResponseEntity<AiResponseDTO> response2 = restTemplate.exchange("http://192.168.137.142:8080/predict", HttpMethod.POST, http, AiResponseDTO.class);
+            ResponseEntity<AiResponseDTO> response2 = restTemplate.exchange("http://192.168.210.76:8001/predict", HttpMethod.POST, http, AiResponseDTO.class);
             String[][] desease = response2.getBody().getObjects();
 
 
@@ -138,7 +140,7 @@ public class PlantManageService {
 
         }
 
-
+        //ResponseEntity<AiResponseDTO>  = restTemplate.exchange("http://192.168.210.255:8080/predict", HttpMethod.POST, http, AiResponseDTO.class);
 
 
 
@@ -149,7 +151,7 @@ public class PlantManageService {
         // 2. 계산
         long diff = today.getTime() - startDate.getTime();
 
-        long re = diff / (24*60*60*1000);
+        long re = diff / (24*60*60*1000); // ms초로 하루를 나눔.
 
         // 성장 일 수 가져오기.
         int grow = p.getPlantName().getPlantGrowTime();
@@ -176,12 +178,25 @@ public class PlantManageService {
         // 2. 계산
         long diff =today.getTime() - startDate.getTime();
 
-        long re = diff / (24*60*60*1000);
+        long re = diff / (60*60*24*1000); // 하루 일 수 밀리초 단위.
 
         // 성장 일 수 가져오기.
         int grow = p.getPlantName().getPlantGrowTime();
 
+//        LocalDate sd = p.getStartDay().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+//        LocalDate td = LocalDate.now();
+//        long daysBetween = ChronoUnit.DAYS.between(sd, td);
+//
+//        float percent = ((float) daysBetween / grow) * 100;
+
         float percent = (float) re /grow;
+
+        // 100 / 5 -> 25 * a
+
+        int a = 5; // ai에게 받을 단계
+        if(a*20 < percent){
+            percent = a*25;
+        }
 
         System.out.println(percent);
     }
@@ -223,5 +238,13 @@ public class PlantManageService {
         plantManageRepository.save(plantManageEntity);
         userRepository.save(user);
 
+    }
+
+    @Transactional
+    public void deletePlantRate(String username){
+        UserEntity user = userRepository.findByUsername(username);
+        PlantManageEntity p = plantManageRepository.findByUser(user);
+
+        plantManageRepository.delete(p);
     }
 }

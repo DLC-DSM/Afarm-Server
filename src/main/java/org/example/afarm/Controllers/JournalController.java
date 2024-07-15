@@ -50,6 +50,7 @@ public class JournalController {
         return generateResEntity("J_Save",201);
     }
 
+
     @DeleteMapping("/delete")
     public ResponseEntity<?> deleteJournal(Integer num, Authentication authentication){
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
@@ -57,12 +58,20 @@ public class JournalController {
         return generateResEntity("J_Del",200);
     }
 
+//    @ResponseBody
+//    @GetMapping("/select")
+//    public ResponseEntity<?> selectAllJournal(Pageable pageable, Authentication authentication){
+//        UserDetails user = (UserDetails) authentication.getPrincipal();
+//        Page<?> page = journalService.selectAllJournal(pageable,user.getUsername());
+//        return new ResponseEntity<>(page,HttpStatusCode.valueOf(200));
+//    }
+
     @ResponseBody
     @GetMapping("/select")
-    public ResponseEntity<?> selectAllJournal(Pageable pageable, Authentication authentication){
+    public ResponseEntity<?> selectAllJournal(Authentication authentication){
         UserDetails user = (UserDetails) authentication.getPrincipal();
-        Page<?> page = journalService.selectAllJournal(pageable,user.getUsername());
-        return new ResponseEntity<>(page,HttpStatusCode.valueOf(200));
+        List<?> list = journalService.selectAllJournal(user.getUsername());
+        return new ResponseEntity<>(list,HttpStatusCode.valueOf(200));
     }
 
     @ResponseBody
@@ -90,7 +99,6 @@ public class JournalController {
                 .body(images.get(filenum-1));
 
     }
-
 
     @ResponseBody
     @PostMapping("/update")

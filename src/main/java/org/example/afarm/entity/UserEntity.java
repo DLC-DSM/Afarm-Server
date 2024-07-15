@@ -29,3 +29,4 @@ public class UserEntity {
     private PlantEntity plant_name;
 
 }
+

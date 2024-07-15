@@ -9,6 +9,8 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.List;
+
 public interface JournalRepository extends JpaRepository<JournalEntity, Integer> {
     JournalEntity findByUserAndId(UserEntity user, int id);
 
@@ -18,4 +20,6 @@ public interface JournalRepository extends JpaRepository<JournalEntity, Integer>
     @Modifying
     @Query("DELETE FROM JournalEntity j WHERE j.id = :num  AND j.user.username like :user ESCAPE '#'" )
     void deleteByIdAndUser(@Param("num") Integer id, @Param("user") String user);
+
+    List<JournalEntity> findAllByUser(UserEntity user);
 }

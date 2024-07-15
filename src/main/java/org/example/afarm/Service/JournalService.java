@@ -96,10 +96,23 @@ public class JournalService {
         return id;
     }
 
+//    @Transactional
+//    public Page<JournalEntity> selectAllJournal(Pageable pageable, String username){
+//        UserEntity user = userRepository.findByUsername(username);
+//        Page<JournalEntity> journals = journalRepository.findAllByUser(user, pageable);
+//        System.out.println("is in");
+//        if(journals == null){
+//            throw new NullPointerException();
+//        }
+//        else{
+//            return journals;
+//        }
+//    }
+
     @Transactional
-    public Page<JournalEntity> selectAllJournal(Pageable pageable, String username){
+    public List<JournalEntity> selectAllJournal(String username){
         UserEntity user = userRepository.findByUsername(username);
-        Page<JournalEntity> journals = journalRepository.findAllByUser(user, pageable);
+        List<JournalEntity> journals = journalRepository.findAllByUser(user);
         System.out.println("is in");
         if(journals == null){
             throw new NullPointerException();
