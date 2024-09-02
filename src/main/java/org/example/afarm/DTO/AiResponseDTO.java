@@ -11,4 +11,5 @@ import org.springframework.context.annotation.Configuration;
 public class AiResponseDTO {
     private String[][] Objects;
     private int lev;
+    private int growth_percentage;
 }

@@ -15,6 +15,7 @@ import java.io.IOException;
 
 @ResponseBody
 @RestController
+@CrossOrigin(origins = "http://localhost:3000")
 public class UserManageController {
 
     private final UserService userService;

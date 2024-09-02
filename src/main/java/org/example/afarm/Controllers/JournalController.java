@@ -27,6 +27,7 @@ import java.util.List;
 
 @Controller
 @RequestMapping("/journal")
+@CrossOrigin(origins = "http://localhost:3000")
 public class JournalController {
 
     private final JournalService journalService;

@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 
 @Controller
 @ResponseBody
+@CrossOrigin(origins = "http://localhost:3000")
 public class registerController {
 
     private final RegisterService registerService;

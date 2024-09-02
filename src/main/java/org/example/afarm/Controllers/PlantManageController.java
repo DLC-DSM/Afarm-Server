@@ -21,7 +21,8 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 
 @Controller
-@RequestMapping("/PlantM")
+@RequestMapping("/plant_m")
+@CrossOrigin(origins = "http://localhost:3000")
 public class PlantManageController {
     private final PlantManageService plantManageService;
 
@@ -62,6 +63,14 @@ public class PlantManageController {
         return new ResponseEntity<>(HttpStatusCode.valueOf(200));
     }
 
+    @ResponseBody
+    @PostMapping("/ai2")
+    public ResponseEntity<?> AiService(Authentication authentication) throws IOException {
+        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+        plantManageService.aiPlant(userDetails.getUsername());
+        return new ResponseEntity<>(HttpStatusCode.valueOf(200));
+    }
+
 //    @GetMapping("/test2")
 //    public void test(String username){
 //        plantManageService.test(username);
@@ -76,7 +85,7 @@ public class PlantManageController {
     }
 
     @ResponseBody
-    @GetMapping("/GetInfo")
+    @GetMapping("/get_info")
     public ResponseEntity<?> getPlantManage(Authentication authentication, HttpServletRequest request){
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
         System.out.println(request);

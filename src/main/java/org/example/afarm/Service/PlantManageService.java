@@ -22,8 +22,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
-import java.util.Calendar;
-import java.util.Date;
+import java.util.*;
 
 import static java.time.Instant.now;
 
@@ -50,10 +49,10 @@ public class PlantManageService {
         float PollOut = Float.parseFloat(plantInfoDto.getHumi());
         float SoilPoll = Float.parseFloat(plantInfoDto.getDate());
 
-        if(SoilPoll< 10.0){
-            setuation = 3;
-            //firebaseCloudMessageService.sendMessageTo(target,"수분부족","수분이 부족합니다. 물을 주세요.");
-        }
+//        if(SoilPoll< 10.0){
+//            setuation = 3;
+//            //firebaseCloudMessageService.sendMessageTo(target,"수분부족","수분이 부족합니다. 물을 주세요.");
+//        }
 
 
 
@@ -101,6 +100,10 @@ public class PlantManageService {
 
         MultiValueMap<String,Object> param = new LinkedMultiValueMap<>();
         param.add("file",body);
+        //param.add("width",10);
+        //param.add("height",10);
+
+
 
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.setContentType(MediaType.MULTIPART_FORM_DATA);
@@ -140,31 +143,94 @@ public class PlantManageService {
 
         }
 
-        //ResponseEntity<AiResponseDTO>  = restTemplate.exchange("http://192.168.210.255:8080/predict", HttpMethod.POST, http, AiResponseDTO.class);
+        //ResponseEntity<AiResponseDTO> rate= restTemplate.exchange("http://192.168.210.76:8001/percent", HttpMethod.POST, http, AiResponseDTO.class);
 
 
 
 
-        Date startDate = p.getStartDay();
-        Date today = Date.from(now());
+//        Date startDate = p.getStartDay();
+//        Date today = Date.from(now());
+//
+//        // 2. 계산
+//        long diff = today.getTime() - startDate.getTime();
+//
+//        long re = diff / (24*60*60*1000); // ms초로 하루를 나눔.
+//
+//        // 성장 일 수 가져오기.
+//        int grow = p.getPlantName().getPlantGrowTime();
+//
+//        float percent = (float) (re /grow) * 100;
 
-        // 2. 계산
-        long diff = today.getTime() - startDate.getTime();
-
-        long re = diff / (24*60*60*1000); // ms초로 하루를 나눔.
-
-        // 성장 일 수 가져오기.
-        int grow = p.getPlantName().getPlantGrowTime();
-
-        float percent = (float) (re /grow) * 100;
-
-        System.out.println(percent);
+        //System.out.println(rate);
 
 
 
         p.setSituation(situation);
         plantManageRepository.save(p);
     }
+
+//    @Transactional
+//    public void aiPlant(String username) throws IOException {
+//        UserEntity user = userRepository.findByUsername(username);
+//        PlantManageEntity p = plantManageRepository.findByUser(user);
+//
+//        List list = List.of(12,13,7,15,8,12,13,9,7,9);
+//        int index1 = (int) Math.random()*10;
+//        int index2 = (int) Math.random()*10;
+//
+//        MultiValueMap<String,Object> param = new LinkedMultiValueMap<>();
+//        param.add("width",index1);
+//        param.add("height",index2);
+//
+//        HttpHeaders httpHeaders = new HttpHeaders();
+//        httpHeaders.setContentType(MediaType.MULTIPART_FORM_DATA);
+//        //httpHeaders.setContentType(MediaType.IMAGE_JPEG);
+//
+//        HttpEntity<?> http = new HttpEntity<>(param,httpHeaders);
+//
+//        RestTemplate restTemplate = new RestTemplate();
+//
+//        ResponseEntity<AiResponseDTO> rate= restTemplate.exchange("http://192.168.210.76:8001/percent", HttpMethod.POST, http, AiResponseDTO.class);
+//
+//        System.out.println(rate);
+//
+//    }
+
+    @Transactional
+    public void aiPlant(String username) throws IOException {
+        UserEntity user = userRepository.findByUsername(username);
+        PlantManageEntity p = plantManageRepository.findByUser(user);
+
+        List<Integer> list = List.of(12, 13, 7, 15, 8, 12, 13, 9, 7, 9);
+        int index1 = (int) (Math.random() * list.size());
+        int index2 = (int) (Math.random() * list.size());
+
+        Map<String, Integer> param = new HashMap<>();
+        param.put("width", list.get(index1));
+        param.put("height", list.get(index2));
+
+        System.out.println(param.toString());
+
+        HttpHeaders httpHeaders = new HttpHeaders();
+        httpHeaders.setContentType(MediaType.APPLICATION_JSON);
+
+        HttpEntity<Map<String, Integer>> http = new HttpEntity<>(param, httpHeaders);
+
+        RestTemplate restTemplate = new RestTemplate();
+
+        ResponseEntity<AiResponseDTO> rate = restTemplate.exchange(
+                "http://192.168.210.76:8001/percent",
+                HttpMethod.POST,
+                http,
+                AiResponseDTO.class
+        );
+
+        System.out.println(rate);
+        //System.out.println(Objects.requireNonNull(rate.getBody()).getGrowth_percentage());
+        p.setGrowthRate(Objects.requireNonNull(rate.getBody()).getGrowth_percentage());
+        System.out.println(plantManageRepository.save(p).getGrowthRate());
+    }
+
 
 
     @Transactional

@@ -12,9 +12,11 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.bind.annotation.CrossOrigin;
 
 import java.io.IOException;
 
+@CrossOrigin(origins = "http://localhost:3000")
 public class LoginFilter extends UsernamePasswordAuthenticationFilter {
     private final AuthenticationManager authenticationManager;
     private final JWTUtil jwtUtil;
@@ -50,12 +52,17 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 
         String username = customUserDetails.getUsername();
 
-        String token = jwtUtil.createJwt(username,24*60*60*1000L);
+        String token = jwtUtil.createJwt(username,10*60*1000L);
+        String refreshToken = jwtUtil.createJwt(username,24*60*60*1000L);
+
+
 
         response.addHeader("Authorization","Bearer "+token);
 
-        Cookie cookie = new Cookie("token","Bearer "+token);
-        response.addCookie(cookie);
+//        Cookie cookie = new Cookie("token","Bearer "+token);
+//        cookie.setHttpOnly(true);
+//        cookie.setSecure(true);
+//        response.addCookie(cookie);
         // body 설정
 
     }
