@@ -49,13 +49,15 @@ public class JournalService {
                 .user(entity)
                 .build();
 
+        int id = journalRepository.save(journal).getId();
+
 
         if(journalDto.getFiles() != null && !journalDto.getFiles().isEmpty()){
             for(MultipartFile file1 : journalDto.getFiles()){
                 UUID uuid = UUID.randomUUID();
                 String imageFileName = uuid+"_"+file1.getOriginalFilename();
 
-                String path = "C:/Users/user/IdeaProjects/afarm/src/main/resources/photo/";
+                String path = "C:/Users/user/Desktop/공부/afarm/DLC-1/src/images/";
                 //File destinationFile = new File("/path/"+imageFileName);
 
                 File destinationFile = new File(path+imageFileName);
@@ -70,7 +72,7 @@ public class JournalService {
                 FileEntity image = FileEntity.builder()
                         //.save_path("/path/"+imageFileName)
                         .save_path(path+imageFileName)
-                        .journal(journal.getId())
+                        .journal(id)
                         .build();
 
                 fileRepository.save(image);
@@ -78,7 +80,7 @@ public class JournalService {
             }
         }
 
-        return journalRepository.save(journal).getId();
+        return id;
     }
 
     @Transactional

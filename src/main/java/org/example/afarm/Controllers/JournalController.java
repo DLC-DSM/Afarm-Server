@@ -46,11 +46,12 @@ public class JournalController {
         UserDetails userDetails =  (UserDetails) authentication.getPrincipal();
         System.out.println(request.getHeader("content-type"));
         System.out.println(request.getAttribute("title"));
+        System.out.println(journalDto.getTitle());
         System.out.println(journalDto.getContent());
+        System.out.println(journalDto.getFiles());
         journalService.saveJournal(journalDto,userDetails.getUsername());
         return generateResEntity("J_Save",201);
     }
-
 
     @DeleteMapping("/delete")
     public ResponseEntity<?> deleteJournal(Integer num, Authentication authentication){
@@ -77,7 +78,7 @@ public class JournalController {
 
     @ResponseBody
     @GetMapping("/page")
-    public ResponseEntity<?> selectSingleJournal(Integer num, Authentication authentication){
+    public ResponseEntity<?> selectSingleJournal(@RequestParam Integer num, Authentication authentication){
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
         JournalDto journal = journalService.selectOne(userDetails.getUsername(), num);
         return new ResponseEntity<>(journal,HttpStatusCode.valueOf(200));

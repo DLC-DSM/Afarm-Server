@@ -59,6 +59,8 @@ public class PlantManageController {
     @PostMapping("/ai")
     public ResponseEntity<?> getAiService(MultipartFile file,Authentication authentication) throws IOException {
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+        System.out.println("dmdmdd");
+        System.out.println(file);
         plantManageService.aiPlantRate(file, userDetails.getUsername());
         return new ResponseEntity<>(HttpStatusCode.valueOf(200));
     }

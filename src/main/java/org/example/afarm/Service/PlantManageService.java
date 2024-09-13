@@ -98,6 +98,8 @@ public class PlantManageService {
             }
         };
 
+        System.out.println(body.getFilename());
+
         MultiValueMap<String,Object> param = new LinkedMultiValueMap<>();
         param.add("file",body);
         //param.add("width",10);
@@ -119,10 +121,10 @@ public class PlantManageService {
 
         //상추
         if(p.getPlantName().getPlantName().equals("상추")) {
-            ResponseEntity<AiRevggDto> response = restTemplate.exchange("http://192.168.210.76:8001/predict_vgg", HttpMethod.POST, http, AiRevggDto.class);
-            situation = response.getBody().getPredicted_class();
+            ResponseEntity<Object[]> response = restTemplate.exchange("http://192.168.43.17:8000/Desission", HttpMethod.POST, http, Object[].class);
+            situation = (int) response.getBody()[0];
             System.out.println(response.getHeaders());
-            System.out.println(response.getBody());
+            System.out.println(response.getBody()[0]);
         }
         // 토마토
 
@@ -143,28 +145,29 @@ public class PlantManageService {
 
         }
 
-        //ResponseEntity<AiResponseDTO> rate= restTemplate.exchange("http://192.168.210.76:8001/percent", HttpMethod.POST, http, AiResponseDTO.class);
+        ResponseEntity<Object[]> rate= restTemplate.exchange("http://192.168.43.17:8000/Step", HttpMethod.POST, http, Object[].class);
 
 
 
 
-//        Date startDate = p.getStartDay();
-//        Date today = Date.from(now());
-//
-//        // 2. 계산
-//        long diff = today.getTime() - startDate.getTime();
-//
-//        long re = diff / (24*60*60*1000); // ms초로 하루를 나눔.
-//
-//        // 성장 일 수 가져오기.
-//        int grow = p.getPlantName().getPlantGrowTime();
-//
-//        float percent = (float) (re /grow) * 100;
+        Date startDate = p.getStartDay();
+        Date today = Date.from(now());
 
-        //System.out.println(rate);
+        // 2. 계산
+        long diff = today.getTime() - startDate.getTime();
+
+        long re = diff / (24*60*60*1000); // ms초로 하루를 나눔.
+        // 성장 일 수 가져오기.
+        int grow = p.getPlantName().getPlantGrowTime();
 
 
+        double percent =  (re /(double) grow) * 100;
 
+        //if(percent>(Objects.requireNonNull(rate.getBody()).getGet_result_Step()/grow)*100)
+
+        //System.out.println(rate.getBody().getGet_result_Step());
+
+        p.setGrowthRate((int) percent);
         p.setSituation(situation);
         plantManageRepository.save(p);
     }

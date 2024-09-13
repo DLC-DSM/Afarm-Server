@@ -36,6 +36,7 @@ public class JWTFilter extends OncePerRequestFilter {
         }
 
         String token = auth.split(" ")[1];
+        System.out.println(token);
 
         //토큰 소멸 시간 검증.
         if(jwtUtil.isExpired(token)){

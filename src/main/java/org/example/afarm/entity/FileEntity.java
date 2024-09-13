@@ -16,8 +16,8 @@ public class FileEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
-//    @ManyToOne(cascade = CascadeType.ALL)
-//    @JoinColumn(name = "journal_id_file")
+//  @ManyToOne(cascade = CascadeType.ALL)
+//  @JoinColumn(name = "journal_id_file")
     @Column(name = "journal_id_file")
     private int journal;
 
